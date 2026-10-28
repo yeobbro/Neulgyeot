@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import "./dashboard.css";
 
@@ -24,7 +25,7 @@ export default function NeulgyeotDashboard() {
  const chosen=visible.find(x=>x.id===selected) ?? visible[0];
  const markReviewed=(id:string)=>{setItems(prev=>prev.map(x=>x.id===id?{...x,status:"관찰 중"}:x));setNotice("검토 상태를 데모 화면에 반영했습니다. 실제 기록은 저장되지 않습니다.");};
  return <main className="ng-shell">
-  <aside className="ng-sidebar"><a className="ng-brand" href="/"><span className="ng-mark">늘</span><span><b>늘곁</b><small>CARE INTELLIGENCE</small></span></a><div className="ng-org"><span className="ng-org-dot"/>지자체 통합 돌봄<span className="ng-chevron">⌄</span></div><nav className="ng-nav" aria-label="주요 메뉴">{menu.map(m=><button key={m.id} className={view===m.id?"ng-nav-item active":"ng-nav-item"} onClick={()=>setView(m.id)}><span>{m.icon}</span>{m.label}{m.id==="signals"&&<i>{items.filter(x=>x.status==="검토 필요").length}</i>}</button>)}</nav><div className="ng-sidebar-note"><span>✳</span><b>사람 중심의 AI</b><p>변화 신호는 확인을 돕는 참고 정보입니다. 최종 판단은 담당자가 합니다.</p></div><div className="ng-user"><div className="ng-user-avatar">김</div><span><b>지자체 담당자</b><small>Demo workspace</small></span><span className="ng-chevron">•••</span></div></aside>
+  <aside className="ng-sidebar"><Link className="ng-brand" href="/"><span className="ng-mark">늘</span><span><b>늘곁</b><small>CARE INTELLIGENCE</small></span></Link><div className="ng-org"><span className="ng-org-dot"/>지자체 통합 돌봄<span className="ng-chevron">⌄</span></div><nav className="ng-nav" aria-label="주요 메뉴">{menu.map(m=><button key={m.id} className={view===m.id?"ng-nav-item active":"ng-nav-item"} onClick={()=>setView(m.id)}><span>{m.icon}</span>{m.label}{m.id==="signals"&&<i>{items.filter(x=>x.status==="검토 필요").length}</i>}</button>)}</nav><div className="ng-sidebar-note"><span>✳</span><b>사람 중심의 AI</b><p>변화 신호는 확인을 돕는 참고 정보입니다. 최종 판단은 담당자가 합니다.</p></div><div className="ng-user"><div className="ng-user-avatar">김</div><span><b>지자체 담당자</b><small>Demo workspace</small></span><span className="ng-chevron">•••</span></div></aside>
   <section className="ng-main"><header className="ng-topbar"><div><span className="ng-mobile-brand">늘곁</span><h1>{active.label}</h1></div><div className="ng-top-tools"><label className="ng-search"><span>⌕</span><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="대상자 검색 (이름, 지역, 서비스)" aria-label="대상자 검색"/></label><button className="ng-notify" onClick={()=>{setView("alerts");setNotice("현재 알림은 모두 합성 데이터입니다.");}}>♧<i/></button><div className="ng-profile">김 <span>⌄</span></div></div></header>
    <div className="ng-content"><div className="ng-demo"><span/> DEMO · 합성 데이터 <span className="ng-demo-copy">실제 대상자 정보가 아니며 실제 돌봄 판단에 사용할 수 없습니다.</span></div>
     {notice&&<div className="ng-notice" role="status">{notice}<button onClick={()=>setNotice("")}>×</button></div>}
