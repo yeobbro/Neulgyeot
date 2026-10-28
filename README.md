@@ -46,6 +46,7 @@ AI surfaces change signals and their evidence; care professionals decide what to
 - [Product specification](docs/PRODUCT_SPEC.md)
 - [Technical roadmap](docs/ROADMAP.md)
 - [Data and safety principles](docs/DATA_AND_SAFETY.md)
+- [Community-care and AI strategy](docs/COMMUNITY_CARE_AND_AI_STRATEGY.md)
 
 ## Tech direction
 
