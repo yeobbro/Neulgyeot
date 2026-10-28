@@ -50,7 +50,7 @@ export default function HomePage() {
     <main className="shell">
       <div className="demo-banner"><span className="dot" /><span><b>PROTOTYPE · 합성 데이터</b> 실제 어르신·환자·복지 대상자의 정보가 아닙니다. 실제 돌봄 판단에 사용하지 마세요.</span></div>
       <header className="topbar">
-        <a className="brand" href="/" aria-label="Neulgyeot home"><div className="brand-mark">늘</div><div><small>CARE INTELLIGENCE BY KREWX</small><strong>늘곁 <span>Neulgyeot</span></strong></div></a>
+        <Link className="brand" href="/" aria-label="Neulgyeot home"><div className="brand-mark">늘</div><div><small>CARE INTELLIGENCE BY KREWX</small><strong>늘곁 <span>Neulgyeot</span></strong></div></Link>
         <div className="top-meta"><span className="pill"><i /> Demo environment</span><span className="date">2026. 10. 28 · 수요일</span></div>
       </header>
 
