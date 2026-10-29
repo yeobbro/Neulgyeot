@@ -1,0 +1,26 @@
+/* Resident & family portal — separate from the staff workspace. Large type, plain language. */
+.pt { color-scheme: light; --ink: #1f2d27; --muted: #52615a; --line: #dfe5de; --green: #123a30; min-height: 100vh; background: #f7f8f4; color: var(--ink); font: 18px/1.7 "Noto Sans KR", system-ui, sans-serif; }
+.pt *, .pt *::before, .pt *::after { box-sizing: border-box; }
+.pt button, .pt input, .pt select, .pt textarea { font: inherit; color: inherit; }
+.pt :focus-visible { outline: 3px solid #1d6b52; outline-offset: 2px; }
+.pt-top { background: #10392f; color: #fff; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.pt-top b { font: 700 24px Georgia, "Noto Sans KR", serif; letter-spacing: 1px; }
+.pt-top button { background: transparent; color: #fff; border: 1px solid #ffffff70; border-radius: 10px; padding: 6px 14px; cursor: pointer; }
+.pt-main { max-width: 760px; margin: 0 auto; padding: 18px 16px 60px; display: grid; gap: 16px; }
+.pt-card { background: #fffefa; border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+.pt-card h2 { margin: 0 0 10px; font-size: 22px; }
+.pt-note { background: #f0f3eb; border: 1px solid #dfe6d8; border-radius: 12px; padding: 12px 14px; font-size: 16px; color: #45594a; }
+.pt-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+.pt-list li { border: 1px solid var(--line); border-radius: 12px; padding: 14px; background: #fff; }
+.pt-status { display: inline-block; padding: 2px 10px; border-radius: 8px; background: #e5f2e9; color: #2f6b4b; font-weight: 700; font-size: 16px; }
+.pt-meta { color: var(--muted); font-size: 16px; }
+.pt-field { display: grid; gap: 6px; margin-bottom: 12px; }
+.pt-field input, .pt-field select, .pt-field textarea { border: 1px solid #c5d0c6; border-radius: 10px; padding: 10px 12px; min-height: 48px; background: #fff; }
+.pt-field textarea { min-height: 120px; }
+.pt-btn { min-height: 52px; padding: 10px 20px; border-radius: 12px; border: 0; background: var(--green); color: #fff; font-weight: 700; cursor: pointer; }
+.pt-btn:disabled { opacity: 0.6; }
+.pt-msg { padding: 12px 14px; border-radius: 10px; }
+.pt-msg.error { background: #fbeae5; color: #8e3526; }
+.pt-msg.success { background: #e5f2e9; color: #2f6b4b; }
+.pt-check { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+.pt-check input { width: 24px; height: 24px; }

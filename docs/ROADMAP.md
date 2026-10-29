@@ -8,6 +8,8 @@
 - [ ] Add smoke tests for filters and signal details.
 
 ## v0.2 — Municipal/community care workflow prototype
+
+> 2026-10-29 구현 현황: 지자체 대시보드·지도·사례 타임라인·의뢰 워크플로·자원 디렉터리·가족 포털·AI 요약 검토 UI를 가상 데이터로 구현했습니다. 범위와 한계는 [구현 계획·상태](NEULGYEOT_IMPLEMENTATION_PLAN.md) 참고. 실제 현장 검증은 아직 하지 않았습니다.
 - Add a synthetic-data municipal dashboard with queues for intake, assessment, service referrals, and monitoring.
 - Add a case timeline and closed-loop referral status.
 - Add a service/resource directory with region, service type, contact, capacity-status freshness, and accessibility fields.
