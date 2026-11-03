@@ -2,16 +2,16 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Neulgyeot | 늘곁 — Care Intelligence",
+  title: "늘곁 CareLink EMR — 요양병원용 (DEMO)",
   description:
-    "돌봄 현장의 작은 변화를 발견하고, 사람의 판단과 적절한 지원으로 연결하는 KREWX의 AI 돌봄 인텔리전스 프로토타입입니다.",
-  applicationName: "Neulgyeot",
+    "늘곁 요양병원용(Neulgyeot Hospital) EMR 워크스페이스 프로토타입. 합성 데이터만 사용하며 지자체 연계·보호자 리포트는 모의(DEMO)로 동작합니다.",
+  applicationName: "Neulgyeot Hospital",
   robots: { index: false, follow: false }
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a1516",
-  colorScheme: "dark"
+  themeColor: "#ffffff",
+  colorScheme: "light"
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
