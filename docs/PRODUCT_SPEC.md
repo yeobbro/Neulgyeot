@@ -1,73 +1,41 @@
-# Neulgyeot v0.1 — Product specification
+# Neulgyeot Hospital v0.2 — Product specification
+
+## Product boundary
+
+Neulgyeot is split into separately deployed products:
+
+| | Product A — Neulgyeot Hospital (this repo) | Product B — Neulgyeot Municipality (separate, not started) |
+|---|---|---|
+| Users | Hospital administrators, doctors, nurses, hospital social workers, discharge coordinators | City/county/district integrated-care staff, 읍·면·동 case managers, community-care providers, residents/authorized family |
+| Owns | Hospital EMR records, clinical access permissions, discharge planning, referral preparation, family reports | Case-management data, assessments, support plans, service matching, provider tracking, monitoring, closure, resource directory |
+| Never includes | Municipal dashboards, municipal case queues, service-management screens | Hospital EMR, unrestricted clinical records |
+
+A third, future product — **늘곁 패밀리 (Family app)** — will show guardians only the reports explicitly approved for their account.
 
 ## Purpose
 
-Help a care team notice meaningful deviations from a person's usual routine and review them with evidence. The first prototype demonstrates the workflow with synthetic data only.
+Help hospital staff understand a patient's current status, review functional and care information, prepare discharge planning, verify consent and legal-basis review, and send a structured, minimum-necessary referral to a separate municipal care system — plus share approved care updates with authorized guardians.
 
-## Primary users
+## v0.2 scope (implemented, synthetic data, demo state)
 
-- Care workers and nurses in care facilities
-- Social workers and case managers in community-care settings
-- Supervisors who coordinate daily follow-up
+1. **Workstation layout** — desktop-first (1440px) three columns: patient list (search, ward, admission status, discharge-planned filters, keyboard navigation) · EMR summary · monitoring & review. Responsive at tablet/mobile widths.
+2. **EMR summary** — patient ID, name, birth date, gender, ward/room/bed, attending physician, admission and planned discharge dates, status; KCD diagnoses; functional note; K-ADL (eating, mobility, toileting) with previous assessment; K-MMSE score record; Morse Fall Scale score and the instrument's band; medication summary; recent notes. No interpretations are generated.
+3. **Monitoring** — latest BP, pulse, temperature, SpO₂ with timestamp, source and recorder labels; fixed-scale SVG trends with gaps for missing data; history table; change signals vs. personal baseline with evidence and "검토 완료 표시". Neutral labels only: 확인 필요, 기록 없음, 최근 측정, 데이터 부족, 관찰 중.
+4. **병동 현황, 진료·간호 기록, 투약 요약, 알림** — census and bed map, note table with family-shareable flag, medication record presence, review notices and audit events.
+5. **퇴원·지역연계** — see [Municipal referral integration](MUNICIPAL_REFERRAL_INTEGRATION.md).
+6. **보호자 리포트** — see [Family Care Reports](FAMILY_REPORTS.md).
 
-## Primary workflow
+## Not included
 
-1. View a care overview for the current day.
-2. See people whose recent observations differ from their own baseline.
-3. Open a change signal and inspect the relevant observations and baseline.
-4. Mark the signal for human review or record that it has been reviewed.
-5. Use the evidence to decide what action is appropriate; the system does not decide the action.
+- Product B (municipal application) or any municipal screens.
+- Real data, real integrations, real message delivery, device connections.
+- Authentication, roles, tenancy, persistence, production audit log.
+- Diagnosis, treatment recommendations, emergency prediction, AI summarization.
 
-## v0.1 scope
+## Success criteria for v0.2
 
-### Included in the web prototype
-- Overview cards using synthetic sample counts.
-- Care setting filters: all, facility, community.
-- Change-signal list with clear evidence descriptions.
-- Selected-subject observation timeline.
-- Comparison against a synthetic baseline.
-- Empty states and visible prototype/synthetic-data disclosures.
-- Responsive layouts for desktop and mobile.
-
-### Not included
-- Real residents or welfare recipients.
-- Real-time health devices, wearables, or sensor integrations.
-- Medical diagnosis, treatment recommendations, or emergency predictions.
-- Actual user accounts, organization tenancy, role-based permissions, or audit logs.
-- Persistent database, real imports, notifications, or messaging.
-- Production LLM/RAG or clinical/nursing decision automation.
-
-## Change-signal design
-
-A signal is a reason to review, not a diagnosis. Each visible signal should show:
-- the observed variable or note;
-- the recent observation period;
-- the person's own comparison baseline;
-- the evidence used to raise the signal;
-- the data source and freshness when available;
-- a neutral label such as "확인 권장".
-
-Avoid implying that a single indicator proves harm or determines urgency. Missing observations should be labeled "데이터 부족" rather than silently treated as normal.
-
-## Initial data domains
-
-- Meals and hydration
-- Sleep and rest
-- Activity and mobility
-- Toileting and daily living notes
-- Medication administration records (record presence/status only, not prescribing)
-- Care-worker observations
-- Social contact and community visits, where appropriate and consented
-
-## Success criteria for v0.1
-
-- Prototype loads and works on desktop and mobile.
-- Sample records are consistently marked as synthetic.
-- A visitor can filter by setting and open a signal to understand the evidence.
-- No diagnosis or automated action language appears in the UI.
-- No real personal data or secrets are committed.
-- Core UI and data-processing logic can be tested independently.
-
-## Public description
-
-"Neulgyeot is an early care-intelligence prototype that explores how care teams can notice changes in daily records and review the supporting evidence. The current demo uses synthetic data only."
+- Selecting a patient updates every patient panel; all menus work.
+- Assessment validation, consent gate, payload preview, send simulation and status timeline work end-to-end.
+- Family report generation → review → approval → mock delivery → history works; revocation blocks further sharing.
+- `npm run lint`, `npm test`, `npm run build` pass.
+- All sample records are visibly marked synthetic; no claims of real integration.

@@ -1,20 +1,30 @@
 # Neulgyeot technical roadmap
 
-## v0.1 — Public prototype (current)
+## v0.1 — Public prototype (done)
 - [x] Brand migration into the Neulgyeot repository.
 - [x] Responsive prototype UI with clearly labeled synthetic records.
 - [x] Explainable demo change signals and individual-baseline comparisons.
 - [ ] Verify Vercel production deployment and connect it from KREWX.
-- [ ] Add smoke tests for filters and signal details.
 
-## v0.2 — Municipal/community care workflow prototype
-- Add a synthetic-data municipal dashboard with queues for intake, assessment, service referrals, and monitoring.
-- Add a case timeline and closed-loop referral status.
-- Add a service/resource directory with region, service type, contact, capacity-status freshness, and accessibility fields.
-- Prototype the resident/family mobile view for request status, approved plan, schedule, consent, and feedback.
-- Add a review UI for AI-assisted note summaries with evidence/source and human approval.
-- Validate workflows with municipal staff, case managers, care providers, and residents/families before adding real data.
-- See [Community-care and AI strategy](COMMUNITY_CARE_AND_AI_STRATEGY.md).
+## v0.2 — Neulgyeot Hospital EMR workspace (current, synthetic data)
+- [x] Product split decided: this repository is **Neulgyeot Hospital**; **Neulgyeot Municipality** is a separate product.
+- [x] Clinical three-column workstation (patient list, EMR summary, monitoring/review); old mixed facility/community filter removed.
+- [x] Ward census, notes, medication-record summary, review notices, in-memory audit events.
+- [x] Discharge & municipal referral workflow with assessment, consent/legal-basis gate, minimum-necessary JSON contract, **mock** adapter and status timeline.
+- [x] Family Care Reports with scoped sharing, rule-based drafts with sources, approval, print preview, **mock** delivery, revocation.
+- [x] Unit tests (`npm test`) for referral validation, mock adapter and family-report rules.
+- [ ] Browser E2E tests in CI (Playwright) and accessibility audit (axe).
+- [ ] Workflow validation with hospital social workers, nurses and discharge coordinators.
+- [ ] Production municipal integration — **not started**; requires approved municipal API specification, partner authorization, legal and security review. See [Municipal referral integration](MUNICIPAL_REFERRAL_INTEGRATION.md).
+
+## Separate product — Neulgyeot Municipality (not in this repository)
+- Referral intake, case assessment, individual support plans, service matching, provider response tracking, monitoring and closure, regional resource directory.
+- Independent deployment, data store, organization boundary and permission model.
+- Receives only authorized referral payloads and returns limited status callbacks.
+- See [Community-care and AI strategy](COMMUNITY_CARE_AND_AI_STRATEGY.md) for background.
+
+## Separate product — 늘곁 패밀리 (not started)
+- Guardian app that shows only staff-approved reports for the authorized account; supports withdrawal and revocation.
 
 ## v0.3 — Baseline and change detection
 - Define typed observation schemas with unit, timestamp, source, and confidence.
@@ -24,12 +34,13 @@
 - Produce evidence objects that can explain each signal.
 - Add unit tests for baseline math, missing observations, and false-alert edge cases.
 
-## v0.4 — API and persistence
+## v0.4 — API and persistence (Hospital)
 - Implement a FastAPI service with versioned endpoints.
 - Move to PostgreSQL rather than relying on a serverless filesystem.
 - Add migrations, data-retention policies, tenant boundaries, and structured audit logs.
 - Add authentication and role-based access before any non-synthetic data is considered.
 - Make imports idempotent and validate every input row.
+- Move the referral adapter server-side (OAuth 2.0 client credentials, TLS 1.3, idempotency keys, trace IDs, retries, audit events, status callbacks). Never store tokens in the browser.
 
 ## v0.5 — Care-note assistance
 - Explore extraction of structured facts from free-text care notes.
