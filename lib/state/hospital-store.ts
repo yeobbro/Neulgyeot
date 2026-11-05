@@ -10,8 +10,10 @@ import { initialAssessment, initialConsent } from "../integrations/municipal-ref
 import type { ConsentRecord, SocialWorkAssessment, TransferRecord } from "../integrations/municipal-referral/types";
 import { defaultSharingSetting } from "../family-report/build";
 import type { FamilyReport, GuardianSharingSetting } from "../family-report/types";
+import type { AuditEntry, CareEvent } from "../care/types";
+import { SEED_CARE_EVENTS } from "../demo/care-data";
 
-export type View = "summary" | "ward" | "records" | "medication" | "discharge" | "family" | "alerts";
+export type View = "summary" | "ward" | "records" | "quickcare" | "caretimeline" | "medication" | "discharge" | "family" | "alerts";
 
 export type AuditCategory = "지역연계" | "동의" | "보호자 리포트" | "공유 설정" | "관찰 검토";
 
@@ -36,6 +38,9 @@ export interface HospitalState {
   reports: FamilyReport[];
   reviewedSignals: string[];
   audit: AuditEvent[];
+  /** Quick Tagging (2026-11-06): care events (append-only; corrections void + replace) and their audit trail. */
+  careEvents: CareEvent[];
+  careAudit: AuditEntry[];
 }
 
 export const CURRENT_ACTOR = "정다은 (의료사회복지사 · DEMO)";
@@ -55,7 +60,9 @@ export function initialState(patients: Patient[] = PATIENTS): HospitalState {
     sharing,
     reports: [],
     reviewedSignals: [],
-    audit: []
+    audit: [],
+    careEvents: SEED_CARE_EVENTS,
+    careAudit: []
   };
 }
 
@@ -76,7 +83,8 @@ export type HospitalAction =
   | { type: "upsertTransfer"; record: TransferRecord; action: string }
   | { type: "reviewSignal"; patientId: string; signalId: string }
   | { type: "updateSharing"; setting: GuardianSharingSetting; action: string | null }
-  | { type: "upsertReport"; report: FamilyReport; action: string | null };
+  | { type: "upsertReport"; report: FamilyReport; action: string | null }
+  | { type: "careCommit"; upsert: CareEvent[]; audit: AuditEntry };
 
 function audit(state: HospitalState, category: AuditCategory, action: string, patientId: string, detail = ""): HospitalState {
   const at = demoNow(state.tick);
@@ -134,6 +142,11 @@ export function hospitalReducer(state: HospitalState, action: HospitalAction): H
       const reports = exists ? state.reports.map((r) => (r.id === action.report.id ? action.report : r)) : [action.report, ...state.reports];
       const next = { ...state, reports };
       return action.action ? audit(next, "보호자 리포트", action.action, action.report.patientId, `${action.report.id} · ${action.report.status}`) : next;
+    }
+    case "careCommit": {
+      const ids = new Set(action.upsert.map((e) => e.care_event_id));
+      const kept = state.careEvents.filter((e) => !ids.has(e.care_event_id));
+      return { ...state, careEvents: [...kept, ...action.upsert], careAudit: [action.audit, ...state.careAudit] };
     }
   }
 }
