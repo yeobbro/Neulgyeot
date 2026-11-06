@@ -49,7 +49,7 @@ for (const [vpName, viewport] of [["desktop", { width: 1440, height: 900 }], ["m
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
     page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
-    const res = await page.request.post(`${BASE}/api/auth/demo-login`, { data: { userId: user } });
+    const res = await page.request.post(`${BASE}/api/auth/demo-login`, { data: { userId: user }, headers: { origin: BASE } });
     if (!res.ok()) failures.push(`${user}: login ${res.status()}`);
     for (const path of pages) {
       errors.length = 0;
@@ -72,7 +72,7 @@ for (const [vpName, viewport] of [["desktop", { width: 1440, height: 900 }], ["m
 {
   const ctx = await browser.newContext();
   const page = await ctx.newPage();
-  await page.request.post(`${BASE}/api/auth/demo-login`, { data: { userId: "U-F7" } });
+  await page.request.post(`${BASE}/api/auth/demo-login`, { data: { userId: "U-F7" }, headers: { origin: BASE } });
   await page.goto(`${BASE}/portal`);
   const html = await page.content();
   if (html.includes("내부 메모(가상)")) failures.push("portal leaks staff note");
@@ -87,7 +87,7 @@ for (const [vpName, viewport] of [["desktop", { width: 1440, height: 900 }], ["m
   const page = await ctx.newPage();
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  await page.request.post(`${BASE}/api/auth/demo-login`, { data: { userId: "U-W1" } });
+  await page.request.post(`${BASE}/api/auth/demo-login`, { data: { userId: "U-W1" }, headers: { origin: BASE } });
   const step = async (name, fn) => {
     try {
       await fn();
@@ -142,7 +142,7 @@ for (const [vpName, viewport] of [["desktop", { width: 1440, height: 900 }], ["m
     if (!download.suggestedFilename().endsWith(".csv")) throw new Error("not a csv");
   });
 
-  await page.request.post(`${BASE}/api/auth/demo-login`, { data: { userId: "U-F7" } });
+  await page.request.post(`${BASE}/api/auth/demo-login`, { data: { userId: "U-F7" }, headers: { origin: BASE } });
   await step("family sends a request", async () => {
     await page.goto(`${BASE}/portal`);
     await page.getByLabel("제목").fill("E2E 문의");
