@@ -15,6 +15,8 @@ import { MedicationView } from "./MedicationView";
 import { AlertsView } from "./AlertsView";
 import { DischargeWorkspace } from "@/components/discharge/DischargeWorkspace";
 import { FamilyReportWorkspace } from "@/components/family/FamilyReportWorkspace";
+import { QuickCareView } from "@/components/care/QuickCareView";
+import { CareTimelineView } from "@/components/care/CareTimelineView";
 
 export function HospitalApp() {
   const [state, dispatch] = useReducer(hospitalReducer, undefined, () => initialState(PATIENTS));
@@ -33,12 +35,14 @@ export function HospitalApp() {
           <span>활력징후는 수기 입력 기록의 고정 예시값이며 의료기기와 실시간 연결되어 있지 않습니다.</span>
         </div>
         <div className={`workspace ${withSide ? "with-side" : ""}`}>
-          {state.view === "ward" ? null : <PatientList />}
-          <div className="content" style={state.view === "ward" ? { gridColumn: "1 / -1" } : undefined}>
+          {state.view === "ward" || state.view === "quickcare" ? null : <PatientList />}
+          <div className="content" style={state.view === "ward" || state.view === "quickcare" ? { gridColumn: "1 / -1" } : undefined}>
             <main id="main" className="col col-center">
               {state.view === "summary" && <SummaryView />}
               {state.view === "ward" && <WardView />}
               {state.view === "records" && <RecordsView />}
+              {state.view === "quickcare" && <QuickCareView />}
+              {state.view === "caretimeline" && <CareTimelineView />}
               {state.view === "medication" && <MedicationView />}
               {state.view === "discharge" && <DischargeWorkspace />}
               {state.view === "family" && <FamilyReportWorkspace />}

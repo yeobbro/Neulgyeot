@@ -8,6 +8,8 @@ const NAV: { view: View; label: string }[] = [
   { view: "summary", label: "환자 요약" },
   { view: "ward", label: "병동 현황" },
   { view: "records", label: "진료·간호 기록" },
+  { view: "quickcare", label: "현장 케어 기록" },
+  { view: "caretimeline", label: "케어 타임라인" },
   { view: "medication", label: "투약 요약" },
   { view: "discharge", label: "퇴원·지역연계" },
   { view: "family", label: "보호자 리포트" },
@@ -45,6 +47,7 @@ export function TopNav({ noticeCount }: { noticeCount: number }) {
         <span className="facility">
           {DEMO_FACILITY.name} · {DEMO_FACILITY.today}
         </span>
+        <a className="btn btn-sm" href="/family">보호자 화면</a>
         <span className="badge demo">DEMO</span>
         <span className="user">
           <span className="user-avatar" aria-hidden="true">정</span>
