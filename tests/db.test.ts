@@ -11,9 +11,10 @@ describe("database", () => {
     const tables = async () => (await db.query<{ n: number }>(`SELECT count(*)::int AS n FROM information_schema.tables WHERE table_schema = 'public'`))[0].n;
     assert.ok((await tables()) >= 19);
     assert.deepEqual(await applyMigrations(db), [], "re-applying is a no-op");
+    assert.equal(await rollbackLast(db), "002_security");
     assert.equal(await rollbackLast(db), "001_init");
     assert.equal(await tables(), 1);
-    assert.deepEqual(await applyMigrations(db), ["001_init"]);
+    assert.deepEqual(await applyMigrations(db), ["001_init", "002_security"]);
     await db.close();
   });
 

@@ -51,7 +51,7 @@ export function getDb(): Promise<Db> {
   if (!globalForDb.__neulgyeotDb) {
     globalForDb.__neulgyeotDb = (async () => {
       const db = await openDb(defaultDataDir());
-      if (process.env.NEULGYEOT_AUTO_SEED !== "false") {
+      if (autoSeedEnabled()) {
         const { seedIfEmpty } = await import("./seed");
         await seedIfEmpty(db);
       }
@@ -62,6 +62,18 @@ export function getDb(): Promise<Db> {
     });
   }
   return globalForDb.__neulgyeotDb;
+}
+
+/**
+ * Demo seed runs automatically only on a demo deployment: NEULGYEOT_AUTO_SEED=true, or (unset) when demo login is enabled.
+ * A production deployment without demo login never seeds synthetic rows into its database.
+ */
+export function autoSeedEnabled(): boolean {
+  if (process.env.NEULGYEOT_AUTO_SEED === "true") return true;
+  if (process.env.NEULGYEOT_AUTO_SEED === "false") return false;
+  if (process.env.NEULGYEOT_DEMO_LOGIN === "true") return true;
+  if (process.env.NEULGYEOT_DEMO_LOGIN === "false") return false;
+  return process.env.NODE_ENV !== "production";
 }
 
 /** Tests inject their own in-memory database. */

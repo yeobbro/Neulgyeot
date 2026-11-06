@@ -82,6 +82,9 @@ export async function resetData(db: Db) {
     "action_tasks", "risk_assessments", "record_revisions", "care_records", "service_referrals", "service_catalog",
   ];
   await db.transaction(async (tx) => {
+    // audit_logs is append-only (migration 002); only this explicit demo reset may purge it, inside this transaction.
+    await tx.query(`SELECT set_config('neulgyeot.allow_audit_purge', 'on', true)`);
+    await tx.query(`DELETE FROM revoked_sessions`);
     for (const t of tables) await tx.query(`DELETE FROM ${t}`);
     await tx.query(`UPDATE users SET recipient_id = NULL`);
     await tx.query(`DELETE FROM care_recipients`);

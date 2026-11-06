@@ -3,13 +3,14 @@ import { createSessionToken, demoLoginEnabled, SESSION_COOKIE, sessionCookieOpti
 import { homeFor } from "@/lib/server/auth/current";
 import { getDb } from "@/lib/server/db/client";
 import { AppError } from "@/lib/server/errors";
-import { errorResponse, json, parseBody, rateLimit } from "@/lib/server/http";
+import { assertSameOrigin, errorResponse, json, parseBody, rateLimit } from "@/lib/server/http";
 
 const schema = z.object({ userId: z.string().min(1).max(40) }).strict();
 
 /** Demo-only sign-in: choose a synthetic account. Disabled unless NEULGYEOT_DEMO_LOGIN allows it. */
 export async function POST(req: Request) {
   try {
+    assertSameOrigin(req);
     if (!demoLoginEnabled()) throw new AppError("forbidden", "데모 로그인이 비활성화되어 있습니다.");
     rateLimit(`login:${req.headers.get("x-forwarded-for") ?? "local"}`, 30, 60_000);
     const { userId } = await parseBody(req, schema);

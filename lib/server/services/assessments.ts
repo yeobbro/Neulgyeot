@@ -3,6 +3,7 @@ import { REVIEW_STATUSES, type RecordFlag, type RecordType, type ReferralStatus,
 import { RULE_VERSION } from "../../domain/rules/config";
 import { evaluateRules, type RuleInput, type RuleResult } from "../../domain/rules/engine";
 import { interpretRecords, type RecordInterpretation } from "../ai/interpret";
+import { aiAllowedForRecipient } from "../ai/policy";
 import { audit } from "../audit";
 import { assertRecipientAccess, regionScopeSql, requireRole } from "../auth/permissions";
 import type { Actor } from "../auth/session";
@@ -131,13 +132,20 @@ export async function runAssessment(
 
   let ai: Awaited<ReturnType<typeof interpretRecords>> = { status: "skipped", reason: "AI 해석을 요청하지 않았습니다." };
   if (opts.useAi) {
-    const windowStart = new Date(outcome.window.start);
-    const recent = await db.query<{ id: string; record_type: string; visit_status: string | null; recorded_at: Date; content: string }>(
-      `SELECT id, record_type, visit_status, recorded_at, content FROM care_records
-       WHERE recipient_id = $1 AND deleted_at IS NULL AND recorded_at BETWEEN $2 AND $3 ORDER BY recorded_at, id LIMIT 40`,
-      [recipientId, windowStart, now],
-    );
-    ai = await interpretRecords(recent.map((r) => ({ id: r.id, type: r.record_type, visitStatus: r.visit_status, date: r.recorded_at.toISOString().slice(0, 10), content: r.content })));
+    const [rec] = await db.query<{ is_demo_data: boolean }>(`SELECT is_demo_data FROM care_recipients WHERE id = $1`, [recipientId]);
+    const allowed = aiAllowedForRecipient(Boolean(rec?.is_demo_data));
+    if (!allowed.ok) {
+      // Real (non-synthetic) care data never leaves the server: legal basis, consent, 위탁 and 국외 이전 review are not done.
+      ai = { status: "skipped", reason: allowed.reason };
+    } else {
+      const windowStart = new Date(outcome.window.start);
+      const recent = await db.query<{ id: string; record_type: string; visit_status: string | null; recorded_at: Date; content: string }>(
+        `SELECT id, record_type, visit_status, recorded_at, content FROM care_records
+         WHERE recipient_id = $1 AND deleted_at IS NULL AND recorded_at BETWEEN $2 AND $3 ORDER BY recorded_at, id LIMIT 40`,
+        [recipientId, windowStart, now],
+      );
+      ai = await interpretRecords(recent.map((r) => ({ id: r.id, type: r.record_type, visitStatus: r.visit_status, date: r.recorded_at.toISOString().slice(0, 10), content: r.content })));
+    }
   }
 
   const aiSucceeded = ai.status === "succeeded";

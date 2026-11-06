@@ -2,14 +2,15 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { Role } from "../../domain/constants";
 import { getDb } from "../db/client";
-import { loadActor, SESSION_COOKIE, verifySessionToken, type Actor } from "./session";
+import { loadActor, SESSION_COOKIE, verifySession, type Actor } from "./session";
 
 /** For server components: the signed-in actor, or null. */
 export async function currentActor(): Promise<Actor | null> {
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
-  const uid = verifySessionToken(token);
+  const db = await getDb();
+  const uid = await verifySession(db, token);
   if (!uid) return null;
-  return loadActor(await getDb(), uid);
+  return loadActor(db, uid);
 }
 
 /** Redirects to /login when signed out, and to the actor's home when the role is not allowed. */

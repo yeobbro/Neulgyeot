@@ -1,4 +1,4 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import type { Role } from "../../domain/constants";
 import type { Db } from "../db/client";
 
@@ -34,11 +34,18 @@ const b64 = (s: string) => Buffer.from(s).toString("base64url");
 const sign = (payload: string) => createHmac("sha256", secret()).update(payload).digest("base64url");
 
 export function createSessionToken(userId: string, now = Date.now()): string {
-  const payload = b64(JSON.stringify({ uid: userId, exp: Math.floor(now / 1000) + MAX_AGE_SECONDS }));
+  const payload = b64(JSON.stringify({ uid: userId, jti: randomBytes(12).toString("base64url"), exp: Math.floor(now / 1000) + MAX_AGE_SECONDS }));
   return `${payload}.${sign(payload)}`;
 }
 
+export type SessionClaims = { uid: string; jti: string | null; exp: number };
+
+/** Signature + expiry check only. Use `verifySession` (DB) for revocation. */
 export function verifySessionToken(token: string | undefined | null, now = Date.now()): string | null {
+  return verifySessionClaims(token, now)?.uid ?? null;
+}
+
+export function verifySessionClaims(token: string | undefined | null, now = Date.now()): SessionClaims | null {
   if (!token) return null;
   const [payload, sig] = token.split(".");
   if (!payload || !sig) return null;
@@ -47,9 +54,11 @@ export function verifySessionToken(token: string | undefined | null, now = Date.
   const b = Buffer.from(expected);
   if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
   try {
-    const data = JSON.parse(Buffer.from(payload, "base64url").toString()) as { uid?: string; exp?: number };
+    const data = JSON.parse(Buffer.from(payload, "base64url").toString()) as { uid?: string; jti?: string; exp?: number };
     if (!data.uid || !data.exp || data.exp * 1000 < now) return null;
-    return data.uid;
+    // Tokens without a jti were issued before revocation existed; they are rejected so every live session is revocable.
+    if (!data.jti) return null;
+    return { uid: data.uid, jti: data.jti, exp: data.exp };
   } catch {
     return null;
   }
@@ -111,4 +120,20 @@ export function demoLoginEnabled(): boolean {
   if (process.env.NEULGYEOT_DEMO_LOGIN === "true") return true;
   if (process.env.NEULGYEOT_DEMO_LOGIN === "false") return false;
   return process.env.NODE_ENV !== "production";
+}
+
+/** Full server-side check: signature, expiry, and not revoked by logout. Returns the user id. */
+export async function verifySession(db: Db, token: string | undefined | null, now = Date.now()): Promise<string | null> {
+  const c = verifySessionClaims(token, now);
+  if (!c || !c.jti) return null;
+  const [r] = await db.query<{ jti: string }>(`SELECT jti FROM revoked_sessions WHERE jti = $1`, [c.jti]);
+  return r ? null : c.uid;
+}
+
+/** Logout: the token stays unusable even if a copy of the cookie is replayed before it expires. */
+export async function revokeSession(db: Db, token: string | undefined | null): Promise<boolean> {
+  const c = verifySessionClaims(token);
+  if (!c || !c.jti) return false;
+  await db.query(`INSERT INTO revoked_sessions (jti, user_id, expires_at) VALUES ($1, $2, to_timestamp($3)) ON CONFLICT (jti) DO NOTHING`, [c.jti, c.uid, c.exp]);
+  return true;
 }

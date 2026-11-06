@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { loadActor, readCookie, SESSION_COOKIE, verifySessionToken, type Actor } from "./auth/session";
+import { loadActor, readCookie, SESSION_COOKIE, verifySession, type Actor } from "./auth/session";
 import { getDb, type Db } from "./db/client";
 import { AppError, invalid } from "./errors";
 
@@ -20,8 +20,31 @@ export function errorResponse(err: unknown): Response {
 }
 
 export async function actorFromRequest(db: Db, req: Request): Promise<Actor | null> {
-  const uid = verifySessionToken(readCookie(req.headers.get("cookie"), SESSION_COOKIE));
+  const uid = await verifySession(db, readCookie(req.headers.get("cookie"), SESSION_COOKIE));
   return uid ? loadActor(db, uid) : null;
+}
+
+const UNSAFE = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+
+/**
+ * CSRF defence for cookie-authenticated, state-changing requests (in addition to SameSite=Lax):
+ * the browser must say the request is same-origin (Sec-Fetch-Site) or send an Origin equal to the request's own origin.
+ * Requests with neither header (non-browser clients, tests) are allowed only outside production.
+ */
+export function assertSameOrigin(req: Request) {
+  if (!UNSAFE.has(req.method.toUpperCase())) return;
+  const site = req.headers.get("sec-fetch-site");
+  if (site && site !== "same-origin" && site !== "none") throw new AppError("forbidden", "다른 사이트에서 보낸 요청은 처리할 수 없습니다.");
+  const origin = req.headers.get("origin");
+  if (origin) {
+    const own = new URL(req.url).origin;
+    const forwardedHost = req.headers.get("x-forwarded-host") ?? req.headers.get("host");
+    const proto = req.headers.get("x-forwarded-proto") ?? new URL(req.url).protocol.replace(":", "");
+    const allowed = new Set([own, forwardedHost ? `${proto}://${forwardedHost}` : own]);
+    if (!allowed.has(origin)) throw new AppError("forbidden", "다른 사이트에서 보낸 요청은 처리할 수 없습니다.");
+    return;
+  }
+  if (!site && process.env.NODE_ENV === "production") throw new AppError("forbidden", "요청 출처를 확인할 수 없습니다.");
 }
 
 /** Wraps an authenticated route handler with session loading and uniform error handling. */
@@ -30,6 +53,7 @@ export function route<P extends Record<string, string> = Record<string, never>>(
 ) {
   return async (req: Request, context?: RouteContext): Promise<Response> => {
     try {
+      assertSameOrigin(req);
       const db = await getDb();
       const actor = await actorFromRequest(db, req);
       if (!actor) throw new AppError("unauthenticated", "로그인이 필요합니다.");
@@ -43,6 +67,9 @@ export function route<P extends Record<string, string> = Record<string, never>>(
 }
 
 export async function parseBody<T extends z.ZodType>(req: Request, schema: T): Promise<z.infer<T>> {
+  // JSON only: an HTML form (text/plain, urlencoded, multipart) cannot send application/json cross-site without CORS preflight.
+  const ct = (req.headers.get("content-type") ?? "").toLowerCase();
+  if (!ct.startsWith("application/json")) throw new AppError("validation_error", "Content-Type은 application/json이어야 합니다.");
   let body: unknown;
   try {
     body = await req.json();
