@@ -6,6 +6,8 @@ import { K_ADL_LABEL, type NoteType } from "@/lib/hospital/types";
 import { Badge, Panel } from "@/components/ui/primitives";
 import { useHospital } from "./HospitalContext";
 import { PatientBanner } from "./PatientBanner";
+import { LocalDraftPanel } from "@/components/ai/LocalDraftPanel";
+import { handoverFacts } from "@/lib/local-llm/facts";
 
 const TYPES: NoteType[] = ["간호", "요양", "재활", "사회복지", "의사"];
 
@@ -17,6 +19,9 @@ export function RecordsView() {
   return (
     <>
       <PatientBanner />
+      <Panel title="교대 인수인계 요약" id="handover">
+        <LocalDraftPanel kind="handover" patientId={p.id} facts={handoverFacts(p)} />
+      </Panel>
       <Panel
         title="진료·간호·돌봄 기록"
         id="records"

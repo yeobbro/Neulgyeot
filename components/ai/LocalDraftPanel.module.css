@@ -1,0 +1,8 @@
+.panel { border: 1px dashed var(--border-strong); border-radius: var(--radius); padding: 10px 12px; background: var(--surface-2); display: grid; gap: 8px; margin-top: 8px; }
+.head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.head strong { font-size: 13px; }
+.sentences { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 13px; }
+.cite { display: inline-block; font-size: 10.5px; font-weight: 600; padding: 0 4px; margin-left: 4px; border-radius: 2px; background: var(--green-soft); color: var(--green); cursor: help; }
+.facts { font-size: 12px; color: var(--text-2); }
+.facts summary { cursor: pointer; }
+.facts ol { margin: 4px 0 0; padding-left: 18px; }

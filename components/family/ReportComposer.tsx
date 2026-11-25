@@ -19,6 +19,8 @@ import { sharingKey } from "@/lib/state/hospital-store";
 import { Badge, Checklist, Panel } from "@/components/ui/primitives";
 import { useHospital } from "@/components/hospital/HospitalContext";
 import { formatSources, OriginTag, REPORT_TONE, ReportPreview } from "./ReportPreview";
+import { LocalDraftPanel } from "@/components/ai/LocalDraftPanel";
+import { familyFacts } from "@/lib/local-llm/facts";
 
 const EDITABLE: FamilyReport["status"][] = ["작성 중", "검토 중", "승인 완료"];
 
@@ -228,6 +230,7 @@ export function ReportComposer() {
                 </div>
               ))}
             {report.categories.includes("communication") ? (
+              <>
               <div className="grid-2">
                 <label className="field">
                   <span className="label">돌봄팀 메시지<span className="req">*</span></span>
@@ -239,6 +242,16 @@ export function ReportComposer() {
                   <span className="hint">담당 부서: {report.contactDepartment}</span>
                 </label>
               </div>
+              <LocalDraftPanel
+                kind="family_message"
+                patientId={patient.id}
+                facts={familyFacts(report)}
+                disabled={!editable}
+                maxChars={400}
+                applyLabel="돌봄팀 메시지에 적용"
+                onApply={(text) => edit({ careTeamMessage: text })}
+              />
+              </>
             ) : null}
             <hr className="divider" />
             <div className="grid-2" style={{ alignItems: "start" }}>

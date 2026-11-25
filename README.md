@@ -15,6 +15,7 @@ Neulgyeot is a KREWX product. See [Brand migration](docs/BRAND_MIGRATION.md) for
 - Municipal referral and family-report delivery use **mock adapters only**. No network calls, email, SMS, KakaoTalk or notifications are sent.
 - No diagnosis, treatment recommendation, emergency determination or automated care decision is made.
 - No authentication, persistence, tenancy or production audit log yet — demo state lives in memory and resets on reload.
+- **Optional local LLM drafts** (on-premise, OpenAI-compatible: Ollama/vLLM). Off unless `LOCAL_LLM_MODEL` is set; otherwise the panels show rule-based drafts. Synthetic patients only, every sentence re-verified against cited record facts, staff apply/edit/save — see [Local LLM](docs/LOCAL_LLM.md).
 
 ## Features
 
@@ -26,6 +27,7 @@ Neulgyeot is a KREWX product. See [Brand migration](docs/BRAND_MIGRATION.md) for
 | 투약 요약 | Current medication list and today's administration-record presence only. |
 | 퇴원·지역연계 | 5-step discharge referral: plan → social-work assessment (validated, draft save) → third-party consent & legal-basis review gate → minimum-necessary JSON payload preview with copy → mock send, status timeline, 보완 요청 resubmission. |
 | 보호자 리포트 | Family Care Reports: guardian/consent overview, report composer (period, category scope, rule-based draft with source records, staff edit, review, approval), PDF-style preview with browser print, mock delivery (incl. deterministic failure + retry), open simulation, history, sharing settings with suspension/revocation, audit trail. |
+| 로컬 LLM 초안 | "검토 필요" draft panels: discharge social-worker note (퇴원·지역연계 step 2), easy-language care-team message (보호자 리포트), shift handover summary (진료·간호 기록). Each sentence shows its source fact ids. |
 | 알림 | Neutral care-review notices (확인 필요 / 기록 없음 / 데이터 부족 / 관찰 중) and in-memory audit events. |
 
 ## Run locally
@@ -61,6 +63,9 @@ lib/demo/                    Synthetic hospital data, deterministic demo clock
 lib/hospital/                Domain types, derivations, review notices
 lib/integrations/municipal-referral/  Referral contract types, validation, payload builder, mock adapter
 lib/family-report/           Family report types, draft builder, sharing gates, mock delivery
+lib/local-llm/               Local LLM drafts: fact builders, prompt, output parsing, sentence verification, server client
+app/api/local-llm/           Route handlers: draft (POST), health (GET)
+components/ai/               LocalDraftPanel (review-required draft UI)
 lib/state/                   In-memory reducer and audit events
 tests/                       node:test unit tests
 ```
@@ -72,6 +77,7 @@ tests/                       node:test unit tests
 - [Family Care Reports](docs/FAMILY_REPORTS.md)
 - [Technical roadmap](docs/ROADMAP.md)
 - [Data and safety principles](docs/DATA_AND_SAFETY.md)
+- [Local LLM drafts](docs/LOCAL_LLM.md)
 - [Community-care and AI strategy](docs/COMMUNITY_CARE_AND_AI_STRATEGY.md) — background for the separate Municipality product
 - [Brand migration](docs/BRAND_MIGRATION.md)
 

@@ -12,6 +12,9 @@ import { getAssessment, getConsent } from "@/lib/state/hospital-store";
 import { Badge, Checklist, KV, Panel } from "@/components/ui/primitives";
 import { useHospital } from "@/components/hospital/HospitalContext";
 import { PatientBanner } from "@/components/hospital/PatientBanner";
+import { LocalDraftPanel } from "@/components/ai/LocalDraftPanel";
+import { dischargeFacts } from "@/lib/local-llm/facts";
+import { NOTE_MAX } from "@/lib/integrations/municipal-referral/validation";
 import { AssessmentForm } from "./AssessmentForm";
 import { ConsentPanel } from "./ConsentPanel";
 import { PayloadPreview } from "./PayloadPreview";
@@ -195,13 +198,24 @@ export function DischargeWorkspace() {
       )}
 
       {step === 2 && (
-        <AssessmentForm
-          patient={patient}
-          value={assessment}
-          locked={locked}
-          onChange={(patch) => dispatch({ type: "updateAssessment", patient, patch })}
-          onSave={() => dispatch({ type: "saveAssessment", patient })}
-        />
+        <>
+          <AssessmentForm
+            patient={patient}
+            value={assessment}
+            locked={locked}
+            onChange={(patch) => dispatch({ type: "updateAssessment", patient, patch })}
+            onSave={() => dispatch({ type: "saveAssessment", patient })}
+          />
+          <LocalDraftPanel
+            kind="discharge_note"
+            patientId={patient.id}
+            facts={dischargeFacts(patient, assessment)}
+            maxChars={NOTE_MAX}
+            disabled={locked}
+            applyLabel="사회복지사 소견란에 적용"
+            onApply={(text) => dispatch({ type: "updateAssessment", patient, patch: { socialWorkerNote: text } })}
+          />
+        </>
       )}
 
       {step === 3 && (
