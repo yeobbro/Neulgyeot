@@ -37,6 +37,7 @@
 - Keep a human review step before real-world action.
 - Do not rank a person's social value, worthiness, or eligibility based on behavioral signals.
 - Avoid fear-inducing labels; prefer neutral descriptions such as "관찰 변화" and "확인 권장".
+- Generative drafts run only on an on-premise (local) LLM, only on synthetic records in this phase, cite their source facts per sentence, are re-verified server-side, and are applied only by staff ([LOCAL_LLM.md](LOCAL_LLM.md)).
 
 ## Product claims
 Until validated in a governed setting, describe Neulgyeot as a prototype exploring care-record change detection and prioritization support. Do not claim improved health outcomes, diagnostic accuracy, emergency prevention, or regulatory clearance.
